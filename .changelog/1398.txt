@@ -1,0 +1,3 @@
+```release-note:enhancement
+resource/harness_fme_environment: Add editor restriction and editor allowlist support to change_permissions.
+```
