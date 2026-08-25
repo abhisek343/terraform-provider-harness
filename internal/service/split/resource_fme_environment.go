@@ -66,7 +66,7 @@ func ResourceFMEEnvironment() *schema.Resource {
 			"change_permissions": {
 				Description: "Change permission and approval settings for this environment. " +
 					"Controls whether kills are allowed, whether approvals are required for changes, " +
-					"and who can approve or skip approvals. " +
+					"and who can approve, edit, or skip approvals. " +
 					"Note: the Split API does not return these on read; values are preserved from create/update responses.",
 				Type:     schema.TypeList,
 				Optional: true,
@@ -88,7 +88,13 @@ func ResourceFMEEnvironment() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 						},
-						"approvers":             permissionEntityListSchema("Users, groups, or API keys that can approve changes."),
+						"approvers": permissionEntityListSchema("Users, groups, or API keys that can approve changes."),
+						"are_editors_restricted": {
+							Description: "Whether only specific users/groups/API keys can edit changes.",
+							Type:        schema.TypeBool,
+							Optional:    true,
+						},
+						"editors":                 permissionEntityListSchema("Users, groups, or API keys that can edit changes."),
 						"approval_skippable_by": permissionEntityListSchema("Users, groups, or API keys that can skip the approval requirement."),
 					},
 				},
@@ -204,9 +210,14 @@ func resourceFMEEnvironmentUpdate(ctx context.Context, d *schema.ResourceData, m
 	name := d.Get("name").(string)
 	prod := d.Get("production").(bool)
 	req := splitsdk.UpdateEnvironmentRequest{
-		Name:              &name,
-		Production:        &prod,
-		ChangePermissions: expandChangePermissions(d),
+		Name:       &name,
+		Production: &prod,
+	}
+	// The Split API replaces the complete changePermissions object. Avoid sending
+	// it for unrelated updates so server-side permission fields that Terraform
+	// cannot read back are not accidentally cleared.
+	if d.HasChange("change_permissions") {
+		req.ChangePermissions = expandChangePermissions(d)
 	}
 	if _, err := client.Environments.Update(wsID, d.Id(), req); err != nil {
 		return diag.FromErr(err)
