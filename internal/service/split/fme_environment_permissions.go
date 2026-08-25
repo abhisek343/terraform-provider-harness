@@ -56,6 +56,13 @@ func expandChangePermissions(d *schema.ResourceData) *splitsdk.ChangePermissions
 	if v, ok := m["approvers"]; ok {
 		cp.Approvers = expandPermissionEntities(v.([]interface{}))
 	}
+	if v, ok := m["are_editors_restricted"]; ok {
+		b := v.(bool)
+		cp.AreEditorsRestricted = &b
+	}
+	if v, ok := m["editors"]; ok {
+		cp.Editors = expandPermissionEntities(v.([]interface{}))
+	}
 	if v, ok := m["approval_skippable_by"]; ok {
 		cp.ApprovalSkippableBy = expandPermissionEntities(v.([]interface{}))
 	}
@@ -93,6 +100,10 @@ func flattenChangePermissions(cp *splitsdk.ChangePermissions) []interface{} {
 		m["are_approvers_restricted"] = *cp.AreApproversRestricted
 	}
 	m["approvers"] = flattenPermissionEntities(cp.Approvers)
+	if cp.AreEditorsRestricted != nil {
+		m["are_editors_restricted"] = *cp.AreEditorsRestricted
+	}
+	m["editors"] = flattenPermissionEntities(cp.Editors)
 	m["approval_skippable_by"] = flattenPermissionEntities(cp.ApprovalSkippableBy)
 	return []interface{}{m}
 }
