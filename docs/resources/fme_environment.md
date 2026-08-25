@@ -23,7 +23,7 @@ Create, update, and delete a Harness FME (Split) environment. Import id format: 
 
 ### Optional
 
-- `change_permissions` (Block List, Max: 1) Change permission and approval settings for this environment. Controls whether kills are allowed, whether approvals are required for changes, and who can approve or skip approvals. Note: the Split API does not return these on read; values are preserved from create/update responses. (see [below for nested schema](#nestedblock--change_permissions))
+- `change_permissions` (Block List, Max: 1) Change permission and approval settings for this environment. Controls whether kills are allowed, whether approvals are required for changes, and who can approve, edit, or skip approvals. Note: the Split API does not return these on read; values are preserved from create/update responses. (see [below for nested schema](#nestedblock--change_permissions))
 - `production` (Boolean) Whether this is a production environment.
 
 ### Read-Only
@@ -42,6 +42,8 @@ Optional:
 - `approvers` (Block List) Users, groups, or API keys that can approve changes. (see [below for nested schema](#nestedblock--change_permissions--approvers))
 - `are_approvals_required` (Boolean) Whether approvals are required before changes take effect.
 - `are_approvers_restricted` (Boolean) Whether only specific users/groups/API keys can approve changes.
+- `are_editors_restricted` (Boolean) Whether only specific users/groups/API keys can edit changes.
+- `editors` (Block List) Users, groups, or API keys that can edit changes. (see [below for nested schema](#nestedblock--change_permissions--editors))
 
 <a id="nestedblock--change_permissions--approval_skippable_by"></a>
 ### Nested Schema for `change_permissions.approval_skippable_by`
@@ -58,6 +60,19 @@ Optional:
 
 <a id="nestedblock--change_permissions--approvers"></a>
 ### Nested Schema for `change_permissions.approvers`
+
+Required:
+
+- `id` (String) Identifier of the user, group, or API key.
+- `type` (String) Entity type: `user`, `group`, or `api_key` (a Harness service account).
+
+Optional:
+
+- `name` (String) Display name (resolved by the API; may differ from the value provided at creation).
+
+
+<a id="nestedblock--change_permissions--editors"></a>
+### Nested Schema for `change_permissions.editors`
 
 Required:
 
